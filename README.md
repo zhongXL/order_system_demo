@@ -13,47 +13,145 @@
 ### 3.1	启动数据库mysql
 net -start mysql
 启动成功界面如下：
- 
+ ![image](https://github.com/AngelSXD/sxd_first_repository/blob/master/images/20160615165142.png)
 ### 3.2	启动服务端
 - 指定参数启动服务端：.\main_server.exe $ListenIP $ListenPort $DatabaseUserName $DatabasePassword $databaseIP $databasePort $databaseName
 - 默认参数启动服务器：.\main_server.exe
-<br>其中，</br>
-参数	说明	默认值
-$ListenIP	服务器监听IP地址	0.0.0.0
-$ListenPort	服务器监听端口号	50051
-$DatabaseUserName	数据库用户名	root
-$DatabasePassword	数据库用户密码	123456
-$databaseIP	数据库IP	127.0.0.1
-$databasePort	数据库端口号	3306
-$databaseName	数据库名	order_system
+<br>其中，
+<table>
+ <tr>
+		<td>参数</td>
+		<td>说明</td>
+		<td>默认值</td>
+	</tr>
+ 	<tr>
+		<td>$ListenIP</td>
+		<td>服务器监听IP地址</td>
+		<td>0.0.0.0</td>
+	</tr>
+	<tr>
+		<td>$ListenPort</td>
+		<td>服务器监听端口号</td>
+		<td>50051</td>
+	</tr>
+	<tr>
+		<td>$DatabaseUserName</td>
+		<td>数据库用户名</td>
+		<td>root</td>
+	</tr>
+	<tr>
+		<td>$DatabasePassword</td>
+		<td>数据库用户密码</td>
+		<td>123456</td>
+	</tr>
+	<tr>
+		<td>$databaseIP</td>
+		<td>数据库IP</td>
+		<td>127.0.0.1</td>
+	</tr>
+	<tr>
+		<td>$databasePort</td>
+		<td>数据库端口号</td>
+		<td>3306</td>
+	</tr>
+	<tr>
+		<td>$databaseName</td>
+		<td>数据库名</td>
+		<td>order_system</td>
+	</tr>
+ </table>
+ <br>
 启动成功如下：
  
 ### 3.3	启动http
-指定参数启动http服务：.\main_http.exe $ListenIP $ListenPort $ServerIP $ServerPort
-默认参数启动http服务：先启动http服务器：.\main_http.exe
-其中，
-参数	说明	默认值
-$ListenIP	http监听IP地址	0.0.0.0
-$ListenPort	http监听端口号	8080
-$DatabaseUserName	服务器IP	127.0.0.1
-$DatabasePassword	服务器端口号	50051
+- 指定参数启动http服务：.\main_http.exe $ListenIP $ListenPort $c $ServerPort
+- 默认参数启动http服务：先启动http服务器：.\main_http.exe
+<br>其中，
+<table>
+ <tr>
+		<td>参数</td>
+		<td>说明</td>
+		<td>默认值</td>
+	</tr>
+	<tr>
+		<td>$ListenIP</td>
+		<td>http监听IP地址</td>
+		<td>0.0.0.0</td>
+	</tr>
+	<tr>
+		<td>$ListenPort</td>
+		<td>http监听端口号</td>
+		<td>8080</td>
+	</tr>
+	<tr>
+		<td>$ServerIP</td>
+		<td>服务器IP</td>
+		<td>127.0.0.1</td>
+	</tr>
+	<tr>
+		<td>$ServerPort</td>
+		<td>服务器端口号</td>
+		<td>50051</td>
+	</tr>
+ </table>
+ <br>
 启动成功如下：
  
 ### 3.4	启动客户端
-指定参数启动客户端：.\main_client.exe $HttpIP $HttpPort
-默认参数启动客户端: .\main_client.exe
-其中，
-参数	说明	默认值
-$ HttpIP	提供http服务的IP地址	127.0.0.1
-$ HttpPort	提供http服务的端口号	8080
+- 指定参数启动客户端：.\main_client.exe $HttpIP $HttpPort
+- 默认参数启动客户端: .\main_client.exe
+<br>其中，
+<table>
+ <tr>
+		<td>参数</td>
+		<td>说明</td>
+		<td>默认值</td>
+	</tr>
+	<tr>
+		<td>$HttpIP</td>
+		<td>提供http服务的IP地址</td>
+		<td>127.0.0.1</td>
+	</tr>
+	<tr>
+		<td>$HttpPort</td>
+		<td>提供http服务的端口号</td>
+		<td>8080</td>
+	</tr>
+ </table>
+ <br>
 启动成功如下：
  
 指令信息
-指令	功能	说明
-help	打印指令列表	列出客户端支持的指令
-add	添加订单	根据输入信息添加相关订单
-query	查询订单	根据输入信息查询相关订单
-quit	退出客户端	退出客户端程序
+<table>
+ <tr>
+		<td>指令</td>
+		<td>功能</td>
+		<td>说明</td>
+	</tr>
+	<tr>
+		<td>help</td>
+		<td>打印指令列表</td>
+		<td>列出客户端支持的指令</td>
+	</tr>
+	<tr>
+		<td>add</td>
+		<td>添加订单</td>
+		<td>根据输入信息添加相关订单</td>
+	</tr>
+	<tr>
+		<td>query</td>
+		<td>查询订单</td>
+		<td>根据输入信息查询相关订单</td>
+	</tr>
+	<tr>
+		<td>quit</td>
+		<td>退出客户端</td>
+		<td>退出客户端程序</td>
+	</tr>
+ </table>
+ <br>
+ 
+ 
 #### 3.4.1	help指令
 用户输入“help”,将列出客户端支持的指令
  
