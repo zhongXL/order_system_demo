@@ -1,4 +1,18 @@
 # 使用文档
+
+--------------------------------------------
+为正常显示文档图片，请在host文件中添加以下语句：
+<br>185.199.108.133 raw.Githubusercontent.com
+<br>185.199.108.133 githubusercontent.com
+<br>185.199.109.133 raw.Githubusercontent.com
+<br>185.199.109.133 githubusercontent.com
+<br>185.199.110.133 raw.Githubusercontent.com
+<br>185.199.110.133 githubusercontent.com
+<br>185.199.111.133 raw.Githubusercontent.com
+<br>185.199.111.133 githubusercontent.com
+
+--------------------------------------------
+
 ## 1.	简介
 <br>该项目实现一个简易的订单系统，为商户提供“查单”和“下单”的功能。</br>
 <br>该工程在windows10 VS2019 C++下采用bazel编译。</br>
