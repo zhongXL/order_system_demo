@@ -15,7 +15,7 @@ bool isDouble(const string s)
         else 
         {
             int length = s.length() - 4;
-            if ((s.find_first_of(".") == s.find_last_of(".")) && (s.find_first_of(".") != 0) && (s.find(".") > length))
+            if ((s.find_first_of(".") == s.find_last_of(".")) && (s.find_first_of(".") != 0) && ((s.find(".") > length) || (s.length()<4)))
             {
                 return true;
             }

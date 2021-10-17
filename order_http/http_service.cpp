@@ -132,6 +132,7 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 	httpSvr.Post("/order", [](const Request& req, Response& rsp) {
 		//check param of Request
 		string body = req.body;
+		cout << "body: " << body << endl;
 		if (body.empty())
 		{
 			rsp.body = "There are no enough parameters!";
@@ -141,17 +142,8 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 
 
 		bool res;
-		JSONCPP_STRING errs;
-		Json::Value rootValue;
-		Json::CharReaderBuilder readerBuilder;
 
-		std::unique_ptr<Json::CharReader> const jsonReader(readerBuilder.newCharReader());
-		res = jsonReader->parse(body.c_str(), body.c_str() + body.length(), &rootValue, &errs);
-		if (!res || !errs.empty()) {
-			rsp.body = "parameters parseJson err. ";
-			rsp.status = 404;
-		}
-
+		Json::Value rootValue = split(body.c_str());
 
 		if ((!rootValue.isMember("merchant_id")) || (!rootValue.isMember("merchant_order_id")) || (!rootValue.isMember("description")) || (!rootValue.isMember("address")) || (!rootValue.isMember("amount")) || (!rootValue.isMember("currency")))
 		{
@@ -160,12 +152,13 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 			return;
 		}
 
-		if ((!rootValue["merchant_id"].isInt()) || (!rootValue["merchant_order_id"].isInt()) || (!rootValue["description"].isString()) || (!rootValue["address"].isString()) || (!rootValue["amount"].isDouble()) || (!rootValue["currency"].isString()))
+		if (!isNumber(rootValue["merchant_id"].asString()) || !isNumber(rootValue["merchant_order_id"].asString())|| (!isDouble(rootValue["amount"].asString())))
 		{
 			rsp.body = "Parameters are not in correct format!";
 			rsp.status = 404;
 			return;
 		}
+		
 
 		if (!isUrl(rootValue["address"].asString())) 
 		{
@@ -174,11 +167,11 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 			return;
 		}
 
-		int merchant_id = rootValue["merchant_id"].asInt();
-		int merchant_order_id = rootValue["merchant_order_id"].asInt();
+		int merchant_id = stoi(rootValue["merchant_id"].asString());
+		int merchant_order_id = stoi(rootValue["merchant_order_id"].asString());
 		string description = rootValue["description"].asString();
 		string address = rootValue["address"].asString();
-		double amount = rootValue["amount"].asDouble();
+		double amount = stod(rootValue["amount"].asString());
 		string currency = rootValue["currency"].asString();
 
 

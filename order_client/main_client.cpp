@@ -81,6 +81,7 @@ int main(int argc, char* argv[]) {
                 string amount;
                 string currency;
                 string temp;
+                string query;
                 while (1)
                 {
                     cout << "Please enter merchant ID (A non-negative integer): " << endl;
@@ -90,6 +91,8 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
+                query = "merchant_id=" + merchant_id+"&";
+
                 while (1) 
                 {
                     cout << "Please enter merchant order ID (A non-negative integer): " << endl;
@@ -99,11 +102,13 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
+                query = query + "merchant_order_id=" + merchant_order_id + "&";
 
                 cout << "Please enter description about the order: " << endl;
                 temp = "\n";
                 getline(cin, temp);
                 getline(cin, description);
+                query = query + "description=" + description + "&";
 
                 while (1) 
                 {
@@ -114,7 +119,8 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                
+                query = query + "address=" + address + "&";
+
                 while (1) 
                 {
                     cout << "Please enter an amount for the order(A non-negative number): " << endl;
@@ -124,24 +130,14 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
+                query = query + "amount=" + amount + "&";
 
                 cout << "Please enter the currency for the order: " << endl;
                 cin >> currency;
+                query = query + "currency=" + currency + "&";
 
-                rootValue["merchant_id"] = atoi(merchant_id.c_str());
-                rootValue["merchant_order_id"]= atoi(merchant_order_id.c_str());
-                rootValue["description"] = description;
-                rootValue["address"] = address;
-                rootValue["amount"] = stod(amount);
-                rootValue["currency"] = currency;
 
-                std::ostringstream os;
-                Json::StreamWriterBuilder writerBuilder;
-                std::unique_ptr<Json::StreamWriter> jsonWriter(writerBuilder.newStreamWriter());
-                jsonWriter->write(rootValue, &os);
-                string body = os.str();
-
-                if (auto res = cli.Post("/order", body, "application/json")) {
+                if (auto res = cli.Post("/order", query, "application/json")) {
                     cout << res->status << endl;
                     cout << res->get_header_value("Content-Type") << endl;
                     cout << res->body << endl;
