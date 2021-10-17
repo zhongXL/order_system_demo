@@ -14,7 +14,7 @@
 net -start mysql
 <br>启动成功界面如下：
 
-<br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/netStartMysql.png)
+<br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/netStartMysql.jpg)
 
 
 ### 3.2	启动服务端
@@ -66,7 +66,7 @@ net -start mysql
  <br>
 启动成功如下：
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainServer.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainServer.jpg)
  
 ### 3.3	启动http
 - 指定参数启动http服务：.\main_http.exe $ListenIP $ListenPort $c $ServerPort
@@ -102,7 +102,7 @@ net -start mysql
  <br>
 启动成功如下：
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainHttp.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainHttp.jpg)
  
 ### 3.4	启动客户端
 - 指定参数启动客户端：.\main_client.exe $HttpIP $HttpPort
@@ -128,7 +128,7 @@ net -start mysql
  <br>
 启动成功如下：
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainClient.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/startMainClient.jpg)
  
 指令信息
 <table>
@@ -164,22 +164,22 @@ net -start mysql
 #### 3.4.1	help指令
 用户输入“help”,将列出客户端支持的指令
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/help.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/help.jpg)
 
 #### 3.4.2	add指令
 用户输入”add”指令，将相继输入添加订单中的商户号、商户订单号、订单描述、通知地址、订单金额以及订单支付币种。其中，商户号和商户订单号仅支持非负整数，订单金额最大支持小数点后两位，通知地址需符合URL规则。
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/add.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/add.jpg)
 
 #### 3.4.3	query指令
 用户输入“query“指令，将相继输入查询订单的商户号以及商户订单号。其中，商户号和商户订单号仅支持非负整数。
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/query.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/query.jpg)
  
 #### 3.4.4	quit指令
 用户输入“quit”指令，将退出程序。
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/quit.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/quit.jpg)
 
 ## 4.	注意事项
 ### 4.1	curl操作
@@ -187,7 +187,7 @@ net -start mysql
 curl http://127.0.0.1:8080/order?merchant_id=$1’&’merchant_order_id=$2
 (其中,$1和$2为非负整数)
 
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/curl.png)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/curl.jpg)
  
 - 添加订单暂不支持curl操作
 
