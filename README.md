@@ -14,7 +14,8 @@
 net -start mysql
 <br>启动成功界面如下：
 
-<br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/netStartMysql.png)
+<br> ![image](https://raw.githubusercontent.com/zhongXL/order_system_demo/master/picture/add.jpg)
+
 
 ### 3.2	启动服务端
 - 指定参数启动服务端：.\main_server.exe $ListenIP $ListenPort $DatabaseUserName $DatabasePassword $databaseIP $databasePort $databaseName
