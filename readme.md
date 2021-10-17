@@ -203,5 +203,7 @@ curl http://127.0.0.1:8080/order?merchant_id=$1’&’merchant_order_id=$2
 
  <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/curl.jpg)
  
-- 添加订单暂不支持curl操作
+- 添加订单暂支持curl操作: curl http://127.0.0.1:8080/order -d "merchant_id=$1" -d "merchant_order_id=$2" -d "description=$3" -d "address=$4" -d "amount=$5" -d "currency=$6"
+ <br> (其中，$1为非负整数，$4符合URL规则，$5为非负数）
+<br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/culr_post.jpg)
 
