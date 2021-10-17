@@ -2,7 +2,7 @@
 ## 1.	简介
 <br> 系统目标在为用户提供一个简易的订单系统，为商户提供“下单”和“查单”的功能。该系统基于C++ httplib库，对外使用restful协议开发API，对内使用grpc框架。
 ## 2.	框架设计
- <br> ![image](https://github.com/zhongXL/order_system_demo/blob/master/picture/struct.jpg)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/struct.jpg)
  <br> 
 - 客户端发起http请求；
 - http服务器接收http请求消息，将json数据转换成protobuf数据，之后将请求消息发送给业务服务器；
@@ -69,12 +69,12 @@
 </table>
 
 ## 4.	对象模型设计
- <br> ![image](https://github.com/zhongXL/order_system_demo/blob/master/picture/class.jpg)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/class.jpg)
  <br> 
 ## 5.	数据库设计
 ### 5.1.	表设计
 该系统将订单数据存储于MySQL数据库，订单表的设计如下：
- <br> ![image](https://github.com/zhongXL/order_system_demo/blob/master/picture/database.jpg)
+ <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/database.jpg)
  <br> 
 ### 5.2.	数据安全
 - 避免从互联网访问MySQL,确保特定主机才拥有访问特权。该项目通过修改my.cnf强迫MySQL仅监听本机。
