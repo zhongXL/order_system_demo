@@ -198,12 +198,11 @@ net -start mysql
 ## 4.	注意事项
 ### 4.1	curl操作
 - 查询订单支持curl操作：
-curl http://127.0.0.1:8080/order?merchant_id=$1’&’merchant_order_id=$2
-(其中,$1和$2为非负整数)
+curl.exe http://127.0.0.1:8080/v3/pay/transactions/out-trade-no/${out_trade_no}
 
  <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/curl.jpg)
  
-- 添加订单暂支持curl操作: curl http://127.0.0.1:8080/order -d "merchant_id=$1" -d "merchant_order_id=$2" -d "description=$3" -d "address=$4" -d "amount=$5" -d "currency=$6"
- <br> (其中，$1为非负整数，$4符合URL规则，$5为非负数）
+- 添加订单支持curl操作: 
+- curl.exe -H "Content-Type:application/json" -H "Data_Type:msg" -X POST --data '{\"mchid\": ${mchid}, \"out_trade_no\": ${out_trade_no}, \"description\": ${description}, \"notify_url\": ${notify_url}, \"amount\": ${amount}}' http://127.0.0.1:8080/v3/pay/transactions/jsapi
 <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/culr_post.jpg)
 
