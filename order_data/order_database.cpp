@@ -16,71 +16,73 @@ OrderDataBase::OrderDataBase(const char* userName, const char* password , const 
 	
 	dataBase_port = port;
 }
-int OrderDataBase::findOrder(int merchant_id, int merchant_order_id, OrderData* reply) 
+bool OrderDataBase::findOrder(int merchant_id, string merchant_order_id, OrderData* reply) 
 {
-	
-	int result = 0;
+	bool result = false;
 	MYSQL_RES* res;
 	MYSQL_ROW row;
 	
-	string query = "SELECT * from `order` Where merchant_id = " + to_string(merchant_id) + " AND merchant_order_id = " + to_string(merchant_order_id);
+	string query = "SELECT * from `order` Where merchant_id = " + to_string(merchant_id) + " AND merchant_order_id = \"" + merchant_order_id+"\"";
+	
 	mysql_query(&mysql, query.c_str());
+	
 	res = mysql_store_result(&mysql);
+	
 	row = mysql_fetch_row(res);
+	
 	if (row)
 	{
 		reply->set_merchant_id(atoi(row[0]));
-		reply->set_merchant_order_id(atoi(row[1]));
+		reply->set_merchant_order_id(row[1]);
 		reply->set_description(row[2]);
 		reply->set_address(row[3]);
 		reply->set_amount(strtod(row[4], NULL));
 		reply->set_currency(row[5]);
-		result = 1;
+		result = true;
 	}
+	
 	return result;
 }
 
-int OrderDataBase::addOrder(const OrderData* request)
+bool OrderDataBase::addOrder(const OrderData* request)
 {
 	
-	int result = 0;
+	bool result = false;
 	OrderData findReply;
 	result = findOrder(request->get_merchant_id(), request->get_merchant_order_id(), &findReply);
-	if (result==1)
+	
+	if (result)
 	{
-		if ((request->get_merchant_id() == findReply.get_merchant_id()) && (request->get_merchant_order_id() == findReply.get_merchant_order_id()) && (request->get_description() == findReply.get_description()) && (request->get_address() == findReply.get_address()) && (request->get_amount() == findReply.get_amount()) && (request->get_currency() == findReply.get_currency()))
-		{
-			result = 1;
-		}
-		else
-		{
-			result = 0;
-		}
+		return findReply.isSame(request);
 	}
 
 	else
 	{
+		char* merchant_order_id;
 		char* description;
 		char* address;
 		char* currency;
+		merchant_order_id = (char*)malloc(sizeof(char) * (request->get_merchant_order_id()).length() * 3);
+		memset(merchant_order_id, 0, (request->get_merchant_order_id()).length() * 3);
 		description = (char*)malloc(sizeof(char) * (request->get_description()).length() * 3);
 		memset(description, 0, (request->get_description()).length() * 3);
 		address = (char*)malloc(sizeof(char) * (request->get_address()).length() * 3);
 		memset(address, 0, (request->get_address()).length() * 3);
 		currency = (char*)malloc(sizeof(char) * (request->get_currency()).length() * 3);
 		memset(currency, 0, (request->get_currency()).length() * 3);
+		mysql_real_escape_string(&mysql, merchant_order_id, (request->get_merchant_order_id()).c_str(), (request->get_merchant_order_id()).length());
 		mysql_real_escape_string(&mysql, description, (request->get_description()).c_str(), (request->get_description()).length());
 		mysql_real_escape_string(&mysql, address, (request->get_address()).c_str(), (request->get_address()).length());
 		mysql_real_escape_string(&mysql, currency, (request->get_currency()).c_str(), (request->get_currency()).length());
 
 		/*string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency) VALUES ("+to_string(request->get_merchant_id())+","+to_string(request->get_merchant_order_id())+",'"+request->get_description()+"','"+request->get_address()+"',"+to_string(request->get_amount())+",'"+request->get_currency()+"')";
 		*/
-		string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency) VALUES (" + to_string(request->get_merchant_id()) + "," + to_string(request->get_merchant_order_id()) + ",'" + description + "','" + address + "'," + to_string(request->get_amount()) + ",'" + currency + "')";
+		string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency) VALUES (" + to_string(request->get_merchant_id()) + ",'" + request->get_merchant_order_id() + "','" + description + "','" + address + "'," + to_string(request->get_amount()) + ",'" + currency + "')";
 
 		bool flag = mysql_query(&mysql, query.c_str());
 		if (flag == 0)
 		{
-			result = 1;
+			result = true;
 		}
 
 	}
@@ -108,66 +110,3 @@ void OrderDataBase::freeConnect()
 	//关闭数据库连接
 	mysql_close(&mysql);
 }
-
-//int main(int argc, char** argv) {
-//	// Instantiate the client. It requires a channel, out of which the actual RPCs
-//	// are created. This channel models a connection to an endpoint (in this case,
-//	// localhost at port 50051). We indicate that the channel isn't authenticated
-//	// (use of InsecureChannelCredentials()).
-//
-//	int merchantID = 0;
-//	int merchantOrderID = 4;
-//	string description = "client test";
-//	/*string address = "https://www.baidu.com/client/";*/
-//	string address = "https"; 
-//	double amount = 3;
-//	string currency = "RMB";
-//	OrderData data1(merchantID, merchantOrderID, description, address, amount, currency);
-//	OrderDataBase order;
-//	int result = order.addOrder(&data1);
-//	cout << "Add Order Result:\n" << result << endl;
-//
-//	/*data1.set_amount(3);
-//	result = order.addOrder(&data1);
-//	cout << "Add Order Result:\n" << result << endl;
-//
-//	data1.set_merchant_id(3);
-//	result = order.addOrder(&data1);
-//	cout << "Add Order Result:\n" << result << endl;*/
-//
-//	OrderData reply;
-//	
-//	result=order.findOrder(merchantID, merchantOrderID, &reply);
-//	if (reply.get_description() == "")
-//	{
-//		cout << "Query the order failed!" << endl;
-//	}
-//	else
-//	{
-//		cout << "merchant ID: " << reply.get_merchant_id() << endl;
-//		cout << "merchant order ID: " << reply.get_merchant_order_id() << endl;
-//		cout << "description: " << reply.get_description() << endl;
-//		cout << "address: " << reply.get_address() << endl;
-//		cout << "amount: " << reply.get_amount() << endl;
-//		cout << "currency: " << reply.get_currency() << endl;
-//	}
-//
-//	//OrderData reply1;
-//	//order.findOrder(1, 0, &reply1);
-//	//if (reply1.get_description() == "")
-//	//{
-//	//	cout << "Query the order failed!" << endl;
-//	//}
-//	//else
-//	//{
-//	//	cout << "merchant ID: " << reply1.get_merchant_id() << endl;
-//	//	cout << "merchant order ID: " << reply1.get_merchant_order_id() << endl;
-//	//	cout << "description: " << reply1.get_description() << endl;
-//	//	cout << "address: " << reply1.get_address() << endl;
-//	//	cout << "amount: " << reply1.get_amount() << endl;
-//	//	cout << "currency: " << reply1.get_currency() << endl;
-//	//}
-//
-//	system("pause");
-//	return 0;
-//}

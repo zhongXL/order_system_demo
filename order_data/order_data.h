@@ -6,17 +6,17 @@ class OrderData
 {
 private:
 	int merchant_id;
-	int merchant_order_id;
+	string merchant_order_id;
 	string description;
 	string address;
 	double amount;
 	string currency;
 public:
-	OrderData(int merchant = 0, int merchant_order = 0, string description = "", string address = "", double amount = 0, string currency = "RMB");
+	OrderData(int merchant = 0, string merchant_order = "0", string description = "", string address = "", double amount = 0, string currency = "RMB");
 	void set_merchant_id(int merchant);
 	int get_merchant_id() const;
-	void set_merchant_order_id(int merchant_order);
-	int get_merchant_order_id() const;
+	void set_merchant_order_id(string merchant_order);
+	string get_merchant_order_id() const;
 	void set_description(string description);
 	string get_description() const;
 	void set_address(string address);
@@ -25,5 +25,6 @@ public:
 	double get_amount() const;
 	void set_currency(string currency);
 	string get_currency() const;
+	bool isSame(const OrderData* data);
 };
 #endif

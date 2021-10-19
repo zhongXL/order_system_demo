@@ -22,7 +22,7 @@ public:
    
     string AddOrder(const OrderData* data);
 
-    string QueryOrder(const int& merchantID, const int& merchantOrderID, OrderInformation* reply);
+    string QueryOrder(const int& merchantID, const string& merchantOrderID, OrderInformation* reply);
 
 private:
     unique_ptr<Order::Stub> stub_;

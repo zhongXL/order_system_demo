@@ -27,7 +27,7 @@ string OrderClient::AddOrder(const OrderData* data) {
     // Act upon its status.
     if (status.ok()) 
     {
-        if (reply.result() == 0)
+        if (reply.result() == false)
         {
             return "Add the order failed!";
         }
@@ -44,7 +44,7 @@ string OrderClient::AddOrder(const OrderData* data) {
     }
 }
 
-string OrderClient::QueryOrder(const int& merchantID, const int& merchantOrderID, OrderInformation* reply) {
+string OrderClient::QueryOrder(const int& merchantID, const string& merchantOrderID, OrderInformation* reply) {
     // Data we are sending to the server.
     OrderID orderID;
     orderID.set_merchant_id(merchantID);

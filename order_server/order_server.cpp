@@ -21,7 +21,9 @@ Status OrderServiceImpl::AddOrder(ServerContext* context, const OrderInformation
     requestOrder.set_address(request->address());
     requestOrder.set_amount(request->amount());
     requestOrder.set_currency(request->currency());
-    int result=database->addOrder(&requestOrder);
+    
+    bool result=database->addOrder(&requestOrder);
+    
     reply->set_result(result);
     return Status::OK;
 }
@@ -29,7 +31,7 @@ Status OrderServiceImpl::AddOrder(ServerContext* context, const OrderInformation
 Status OrderServiceImpl::QueryOrder(ServerContext* context, const OrderID* request,
     OrderInformation* reply) {
     OrderData replyOrder;
-    int result = database->findOrder(request->merchant_id(), request->merchant_order_id(), &replyOrder);
+    bool result = database->findOrder(request->merchant_id(), request->merchant_order_id(), &replyOrder);
     reply->set_merchant_id(replyOrder.get_merchant_id());
     reply->set_merchant_order_id(replyOrder.get_merchant_order_id());
     reply->set_description(replyOrder.get_description());

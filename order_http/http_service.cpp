@@ -68,24 +68,36 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 	httpSvr.set_logger([](const Request& req, const Response& res) {
 		printf("%s", log(req, res).c_str());
 		});
-
-	/*httpSvr.Get("/order", http_add_order);*/
-	/*httpSvr.Post("/order", http_query_order);*/
-	httpSvr.Get("/order", [](const Request& req, Response& rsp) {
+	
+	httpSvr.Get(R"(/v3/pay/transactions/out-trade-no/(([-\w\*]){6,32}))", [](const Request& req, Response& rsp) {
 		//check param of Request
-		if ((!req.has_param("merchant_id")) || (!req.has_param("merchant_order_id")))
+		if (req.has_param("timestamp")) 
 		{
-			rsp.body = "There are no enough parameters!";
-			rsp.status = 404;
+			time_t now = time(NULL);
+			int pre =stoi(req.get_param_value("timestamp"));
+			if (now - pre > 3000) 
+			{
+				rsp.body = "Request Timeout";
+				rsp.status = 408;
+				return;
+			}
+		}
+
+		if (!req.has_param("mchid"))
+		{
+			rsp.body = "Please check if the mchid is correct";
+			rsp.status = 400;
 			return;
 		}
 
-		string merchant_id = req.get_param_value("merchant_id");
-		string merchant_order_id = req.get_param_value("merchant_order_id");
-		if (!isNumber(merchant_id) || (!isNumber(merchant_order_id)))
+		string merchant_id = req.get_param_value("mchid");
+		string merchant_order_id = req.matches[1];
+		cout << "merchant_id: " << merchant_id << endl;
+		cout << "merchant_order_id: " << merchant_order_id << endl;
+		if (!isNumber(merchant_id))
 		{
-			rsp.body = "Parameters are not in correct format!";
-			rsp.status = 404;
+			rsp.body = "Please check if the mchid is correct";
+			rsp.status = 400;
 			return;
 		}
 
@@ -94,13 +106,13 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 
 		OrderClient order(grpc::CreateChannel(serverAddress, grpc::InsecureChannelCredentials()));
 		OrderInformation reply;
-		order.QueryOrder(atoi(merchant_id.c_str()), atoi(merchant_order_id.c_str()), &reply);
+		order.QueryOrder(atoi(merchant_id.c_str()), merchant_order_id, &reply);
 
 
 		//response
 		if (reply.description() == "")
 		{
-			rsp.body = "Query the order failed!";
+			rsp.body = "Please check whether the order has initiated a transaction";
 			rsp.status = 404;
 			return;
 		}
@@ -111,12 +123,15 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 			string amount = ss.str();
 
 			Json::Value rootValue = Json::objectValue;
-			rootValue["merchant_id"] = reply.merchant_id();
-			rootValue["merchant_order_id"] = reply.merchant_order_id();
+			Json::Value amountObject = Json::objectValue;
+			rootValue["mchid"] = reply.merchant_id();
+			rootValue["out_trade_no"] = reply.merchant_order_id();
 			rootValue["description"] = reply.description();
-			rootValue["address"] = reply.address();
-			rootValue["amount"] = amount;
-			rootValue["currency"] = reply.currency();
+			rootValue["notify_url"] = reply.address();
+			amountObject["total"] = amount;
+			amountObject["currency"] = reply.currency();
+			rootValue["amount"] = amountObject;
+
 
 			std::ostringstream os;
 			Json::StreamWriterBuilder writerBuilder;
@@ -129,52 +144,34 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 		}
 		});
 
-	httpSvr.Post("/order", [](const Request& req, Response& rsp) {
+	httpSvr.Post("/v3/pay/transactions/jsapi", [](const Request& req, Response& rsp) {
 		//check param of Request
-		string body = req.body;
-		cout << "body: " << body << endl;
-		if (body.empty())
+		rsp.status = 200;
+		Json::Value rootValue = parseBody(req, rsp);
+		if (rsp.status != 200) 
 		{
-			rsp.body = "There are no enough parameters!";
-			rsp.status = 404;
-			return;
-		}
-
-
-		bool res;
-
-		Json::Value rootValue = split(body.c_str());
-
-		if ((!rootValue.isMember("merchant_id")) || (!rootValue.isMember("merchant_order_id")) || (!rootValue.isMember("description")) || (!rootValue.isMember("address")) || (!rootValue.isMember("amount")) || (!rootValue.isMember("currency")))
-		{
-			rsp.body = "There are no enough parameters!";
-			rsp.status = 404;
-			return;
-		}
-
-		if (!isNumber(rootValue["merchant_id"].asString()) || !isNumber(rootValue["merchant_order_id"].asString())|| (!isDouble(rootValue["amount"].asString())))
-		{
-			rsp.body = "Parameters are not in correct format!";
-			rsp.status = 404;
 			return;
 		}
 		
-
-		if (!isUrl(rootValue["address"].asString())) 
-		{
-			rsp.body = "Parameters are not in correct format!";
-			rsp.status = 404;
-			return;
-		}
-
-		int merchant_id = stoi(rootValue["merchant_id"].asString());
-		int merchant_order_id = stoi(rootValue["merchant_order_id"].asString());
+		int merchant_id = rootValue["mchid"].asInt();
+		string merchant_order_id = rootValue["out_trade_no"].asString();
 		string description = rootValue["description"].asString();
-		string address = rootValue["address"].asString();
-		double amount = stod(rootValue["amount"].asString());
-		string currency = rootValue["currency"].asString();
+		string address = rootValue["notify_url"].asString();
+		double amount = rootValue["amount"]["total"].asDouble();
+		string currency = rootValue["amount"]["currency"].asString();
 
-
+		if (rootValue.isMember("timestamp"))
+		{
+			time_t now = time(NULL);
+			int pre = rootValue["timestamp"].asInt64();
+			
+			if (now - pre > 3000)
+			{
+				rsp.body = "Request Timeout";
+				rsp.status = 408;
+				return;
+			}
+		}
 
 		//grpc client
 		string serverAddress = grpcServerIp + ":" + to_string(grpcServerPort);
@@ -182,12 +179,78 @@ int http_initial(Server& httpSvr,string serverIp,int port)
 		OrderData data1(merchant_id, merchant_order_id, description, address, amount, currency);
 		string result = order.AddOrder(&data1);
 		rsp.body = result;
-		rsp.status = 404;
-		if (result == "Add the order success!")
+		rsp.status = 200;
+		if (result != "Add the order success!")
 		{
-			rsp.status = 200;
+			rsp.body = "Please verify whether the merchant order number has been submitted repeatedly";
+			rsp.status = 403;
 		}
+		
 		});
 
 	return 0;
+}
+
+Json::Value parseBody(const Request& req, Response& rsp)
+{
+	string body = req.body;
+	cout << endl << "body: " << body << endl;
+	bool res;
+	JSONCPP_STRING errs;
+	Json::Value rootValue= Json::objectValue;
+	Json::Value amountObject = Json::objectValue;
+	Json::CharReaderBuilder readerBuilder;
+
+	std::unique_ptr<Json::CharReader> const jsonReader(readerBuilder.newCharReader());
+	res = jsonReader->parse(body.c_str(), body.c_str() + body.length(), &rootValue, &errs);
+	if (!res || !errs.empty()) {
+		cout << 1 << endl;
+		rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+		rsp.status = 404;
+		return rootValue;
+	}
+
+	if ((!rootValue.isMember("mchid")) || (!rootValue.isMember("out_trade_no")) || (!rootValue.isMember("description")) || (!rootValue.isMember("notify_url")) || (!rootValue.isMember("amount")))
+	{
+		cout << 2 << endl;
+		rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+		rsp.status = 404;
+		return rootValue;
+	}
+
+	//string amountObjectStr = rootValue["amount"].asString();
+	//res = jsonReader->parse(amountObjectStr.c_str(), amountObjectStr.c_str() + amountObjectStr.length(), &amountObject, &errs);
+	//if (!res || !errs.empty()) {
+	//	rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+	//	rsp.status = 404;
+	//	return rootValue;
+	//}
+
+	amountObject = rootValue["amount"];
+	if ((!amountObject.isMember("total")) || (!amountObject.isMember("currency")))
+	{
+		cout << 3 << endl;
+		rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+		rsp.status = 404;
+		return rootValue;
+	}
+
+
+	if ((!rootValue["mchid"].isInt()) || (!amountObject["total"].isDouble()))
+	{
+		cout << 4 << endl;
+		rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+		rsp.status = 404;
+		return rootValue;
+	}
+
+	if (!isUrl(rootValue["notify_url"].asString()))
+	{
+		cout << 5 << endl;
+		rsp.body = "Please check the request parameters according to the detailed information returned by the interface ";
+		rsp.status = 404;
+		return rootValue;
+	}
+
+	return rootValue;
 }

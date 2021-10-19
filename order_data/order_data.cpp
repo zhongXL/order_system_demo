@@ -1,5 +1,5 @@
 #include"order_data.h"
-OrderData::OrderData(int merchant, int merchant_order , string description , string address , double amount , string currency )
+OrderData::OrderData(int merchant, string merchant_order , string description , string address , double amount , string currency )
 {
 	this->set_merchant_id(merchant);
 	this->set_merchant_order_id(merchant_order);
@@ -16,11 +16,11 @@ int OrderData::get_merchant_id() const
 {
 	return this->merchant_id;
 }
-void OrderData::set_merchant_order_id(int merchant_order)
+void OrderData::set_merchant_order_id(string merchant_order)
 {
 	this->merchant_order_id = merchant_order;
 }
-int OrderData::get_merchant_order_id() const
+string OrderData::get_merchant_order_id() const
 {
 	return this->merchant_order_id;
 }
@@ -55,4 +55,15 @@ void OrderData::set_currency(string currency)
 string OrderData::get_currency() const
 {
 	return this->currency;
+}
+bool OrderData::isSame(const OrderData *data)
+{
+	if ((this->get_merchant_id() == data->get_merchant_id()) && (this->get_merchant_order_id() == data->get_merchant_order_id()) && (this->get_description() == data->get_description()) && (this->get_address() == data->get_address()) && (this->get_amount() == data->get_amount()) && (this->get_currency() == data->get_currency()))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

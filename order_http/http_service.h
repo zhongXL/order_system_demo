@@ -19,5 +19,4 @@ extern int grpcServerPort;
 string dump_headers(const Headers& headers);
 string log(const Request& req, const Response& res);
 int http_initial(Server& httpSvr, string serverIp="127.0.0.1", int port=50051);
-void trim(string& s);
-Json::Value split(const char* in);
+Json::Value parseBody(const Request& req, Response& rsp);

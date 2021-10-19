@@ -17,8 +17,8 @@ service Order {
 }
 
 message OrderInformation {
-  int32 merchant_id = 1;
-  int32 merchant_order_id = 2;
+  int64 merchant_id = 1;
+  string merchant_order_id = 2;
   string description = 3;
   string address = 4;
   double amount = 5;
@@ -26,10 +26,10 @@ message OrderInformation {
 }
 
 message addOrderResult {
-  int32 result = 1;
+  bool result = 1;
 }
 
 message OrderID {
-  int32 merchant_id= 1;
-  int32 merchant_order_id= 2;
+  int64 merchant_id= 1;
+  string merchant_order_id= 2;
 }
