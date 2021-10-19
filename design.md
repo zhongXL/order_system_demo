@@ -1,70 +1,78 @@
 # 设计文档
 ## 1.	简介
-<br> 系统目标在为用户提供一个简易的订单系统，为商户提供“下单”和“查单”的功能。该系统基于C++ httplib库，对外使用restful协议开发API，对内使用grpc框架。
+系统目标在为用户提供一个简易的订单系统，为商户提供“下单”和“查单”的功能。该系统基于C++ httplib库，对外使用restful协议开发API，对内使用grpc框架。
 ## 2.	框架设计
- <br> ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/struct.jpg)
+ ![image](https://github.com/zhongXL/order_system_demo/raw/master/picture/struct.jpg)
  <br> 
 - 客户端发起http请求；
 - http服务器接收http请求消息，将json数据转换成protobuf数据，之后将请求消息发送给业务服务器；
 - 业务服务器接收请求消息，对数据库进行增查操作,之后发送http服务器响应消息。
 - http服务器接收响应消息，将protobuf数据转化成json数据，之后将响应消息发送客户端。
-## 3.	接口设计
+## 3.	接口设计(参考微信支付商业平台API接口)
+- path指该参数为路径参数
+- query指该参数需在请求URL传参
+- body指该参数需在请求JSON传参
 ### 3.1.	查单
-<br> GET　／order
+请求URL：/v3/pay/transactions/out-trade-no/{out_trade_no}
+<br> 请求方式：GET
 <table>
 	<tr>
-		<td>参数</td>
+		<td>参数名</td>
+		<td>变量</td>
 		<td>类型</td>
 		<td>说明</td>
 	<tr>
-		<td>ｍerchant_id	</td>
-		<td>int</td>
 		<td>商户号</td>
-	<tr>
-		<td>ｍerchant_order_id</td>
+		<td>mchid</td>
 		<td>int</td>
+		<td>query, 直连商户的商户号</td>
+	<tr>
 		<td>商户订单号</td>
+		<td>out_trade_no</td>
+		<td>string[6,32]</td>
+		<td>path, 只能是数字、大小写字母_-*且在同一个商户号下唯一</td>
 	</tr>
 </table>
 
 ### 3.2.	下单
-
-<br> POST　/order
+请求URL：/v3/pay/transactions/jsapi
+<br>请求方式：POST
 <table>
 <tr>
-		<td>参数</td>
+		<td>参数名</td>
+		<td>变量</td>
 		<td>类型</td>
 		<td>说明</td>
 	</tr>
 	<tr>
-		<td>ｍerchant_id</td>
-		<td>int</td>
 		<td>商户号</td>
-	</tr>
-	<tr>
-		<td>ｍerchant_order_id</td>
+		<td>mchid</td>
 		<td>int</td>
-		<td>商户订单号</td>
+		<td>body, 直连商户的商户号</td>
 	</tr>
 	<tr>
+		<td>商户订单号</td>
+		<td>out_trade_no</td>
+		<td>string[6,32]</td>
+		<td>body, 只能是数字、大小写字母_-*且在同一个商户号下唯一</td>
+	</tr>
+	<tr>
+		<td>商品描述</td>
 		<td>description</td>
 		<td>string</td>
-		<td>订单描述</td>
+		<td>body, 商品描述</td>
 	</tr>
 	<tr>
-		<td>address</td>
-		<td>String</td>
 		<td>通知地址</td>
+		<td>notify_url</td>
+		<td>String</td>
+		<td>body, 符合URL规则</td>
 	</tr>
 	<tr>
-		<td>amount</td>
-		<td>double</td>
 		<td>订单支付金额</td>
-	</tr>
-	<tr>
-		<td>currency</td>
-		<td>string</td>
-		<td>订单支付币种</td>
+		<td>amount</td>
+		<td>object</td>
+		<td>body, 订单金额信息包括total金额以及currency币种</td>
 	</tr>
 </table>
 
