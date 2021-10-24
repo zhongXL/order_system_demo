@@ -1,4 +1,9 @@
-﻿#include"order_database.h"
+﻿#ifdef __cplusplus
+extern "C" {
+#include <applink.c>
+}
+#endif
+#include"order_database.h"
 using namespace std;
 OrderDataBase::OrderDataBase(const char* userName, const char* password , const char* host , const char* name , unsigned int port)
 {
@@ -22,7 +27,7 @@ bool OrderDataBase::findOrder(int merchant_id, string merchant_order_id, OrderDa
 	MYSQL_RES* res;
 	MYSQL_ROW row;
 	
-	string query = "SELECT * from `order` Where merchant_id = " + to_string(merchant_id) + " AND merchant_order_id = \"" + merchant_order_id+"\"";
+	string query = "SELECT merchant_id,merchant_order_id,description,address,amount,currency,UNHEX(sign) from `order` Where merchant_id = " + to_string(merchant_id) + " AND merchant_order_id = \"" + merchant_order_id+"\"";
 	
 	mysql_query(&mysql, query.c_str());
 	
@@ -38,9 +43,17 @@ bool OrderDataBase::findOrder(int merchant_id, string merchant_order_id, OrderDa
 		reply->set_address(row[3]);
 		reply->set_amount(strtod(row[4], NULL));
 		reply->set_currency(row[5]);
-		result = true;
+		string sign_string = row[6];
+		
+		string verify_string;
+		parseOrderDataToString(reply, verify_string);
+		
+		if (dsaVerify(sign_string, verify_string, PUBLICKEY))
+		{
+			result = true;
+		}
 	}
-	
+
 	return result;
 }
 
@@ -49,6 +62,7 @@ bool OrderDataBase::addOrder(const OrderData* request)
 	
 	bool result = false;
 	OrderData findReply;
+	
 	result = findOrder(request->get_merchant_id(), request->get_merchant_order_id(), &findReply);
 	
 	if (result)
@@ -74,15 +88,32 @@ bool OrderDataBase::addOrder(const OrderData* request)
 		mysql_real_escape_string(&mysql, description, (request->get_description()).c_str(), (request->get_description()).length());
 		mysql_real_escape_string(&mysql, address, (request->get_address()).c_str(), (request->get_address()).length());
 		mysql_real_escape_string(&mysql, currency, (request->get_currency()).c_str(), (request->get_currency()).length());
+		
+
+		string input_string;
+		string sign_string;
+		parseOrderDataToString(request, input_string);
+		bool encrypt_result=my_encrypt(input_string.c_str(), PUBLICKEY, sign_string);
+		
+		if (!encrypt_result) 
+		{
+			return false;
+		}
+		
+		
+		
 
 		/*string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency) VALUES ("+to_string(request->get_merchant_id())+","+to_string(request->get_merchant_order_id())+",'"+request->get_description()+"','"+request->get_address()+"',"+to_string(request->get_amount())+",'"+request->get_currency()+"')";
 		*/
-		string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency) VALUES (" + to_string(request->get_merchant_id()) + ",'" + request->get_merchant_order_id() + "','" + description + "','" + address + "'," + to_string(request->get_amount()) + ",'" + currency + "')";
+		
+		string query = "INSERT INTO `order` (merchant_id,merchant_order_id,description,address,amount,currency,sign) VALUES (" + to_string(request->get_merchant_id()) + ",'" + request->get_merchant_order_id() + "','" + description + "','" + address + "'," + to_string(request->get_amount()) + ",'" + currency + "',HEX('"+ sign_string +"'))";
 
 		bool flag = mysql_query(&mysql, query.c_str());
+		
 		if (flag == 0)
 		{
 			result = true;
+			
 		}
 
 	}
@@ -110,3 +141,47 @@ void OrderDataBase::freeConnect()
 	//关闭数据库连接
 	mysql_close(&mysql);
 }
+
+void OrderDataBase::parseOrderDataToString(const OrderData* data,string & result)
+{
+	result = "merchant_id="+to_string(data->get_merchant_id())+"&merchant_order_id="+data->get_merchant_order_id();
+	result = result + "&description=" + data->get_description() + "&address=" + data->get_address();
+	result = result + "&amount=" + to_string(data->get_amount()) + "&currency=" + data->get_currency();
+	return ;
+}
+
+bool OrderDataBase::my_encrypt(const char* str,const char* path_key,string& sign_string) {
+	char* p_en;
+	RSA* p_rsa;
+	FILE* file;
+	int flen, rsa_len;
+	if ((file = fopen(path_key, "r")) == NULL) {
+		perror("open key file error");
+		return false;
+	}
+	if ((p_rsa = PEM_read_RSA_PUBKEY(file, NULL, NULL, NULL)) == NULL) {
+		//if((p_rsa=PEM_read_RSAPublicKey(file,NULL,NULL,NULL))==NULL){   换成这句死活通不过，无论是否将公钥分离源文件
+		ERR_print_errors_fp(stdout);
+		return false;
+	}
+	flen = strlen(str);
+	rsa_len = RSA_size(p_rsa);
+	p_en = (char*)malloc(rsa_len + 1);
+	memset(p_en, 0, rsa_len + 1);
+	if (RSA_public_encrypt(rsa_len, (unsigned char*)str, (unsigned char*)p_en, p_rsa, RSA_NO_PADDING) < 0) {
+		return NULL;
+	}
+	RSA_free(p_rsa);
+	fclose(file);
+	sign_string = p_en;
+	return true;
+}
+
+bool OrderDataBase::dsaVerify(const string& sign_string, const string& verify_string,const char* path_key)
+{
+	string rsa_string = "";
+	my_encrypt(verify_string.c_str(), path_key,rsa_string);
+	return sign_string == rsa_string;
+}
+
+

@@ -2,10 +2,25 @@
 #include <winSock.h>
 #include <mysql.h>
 #include <stdio.h>
+
+
 #include <Windows.h>
 #include <string>
 #include<stdlib.h>
+#include<fstream>
+#include<openssl/rsa.h>
+#include<openssl/pem.h>
+#include<openssl/err.h>
+#include<time.h>
 #include"order_data.h"
+
+#define OPENSSLKEY "..\\..\\key\\private_key.pem"
+#define PUBLICKEY "..\\..\\key\\public_key.pem"
+#define BUFFSIZE 1024
+static const std::string base64_chars =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+"abcdefghijklmnopqrstuvwxyz"
+"0123456789+/";
 
 
 //using order_proto::OrderInformation;
@@ -15,21 +30,21 @@ class OrderDataBase
 private:
 	
 	MYSQL mysql;
-	char dataBase_userName[255];   //æ•°æ®åº“ç”¨æˆ·åusername
-	char dataBase_password[255];    //æ•°æ®åº“å¯†ç ï¼Œå¡«è‡ªå·±çš„å¯†ç 
-	char dataBase_host[255];   //æ•°æ®åº“è¿æ¥åœ°å€ï¼Œæ³¨æ„æœ‰æ—¶å€™ä½¿ç”¨ä¸»æœºipä¼šæŠ¥é”™ï¼Œæ­¤æ—¶å¯ä»¥å°†ipæ”¹ä¸ºlocalhost
+	char dataBase_userName[255];   //Êı¾İ¿âÓÃ»§Ãûusername
+	char dataBase_password[255];    //Êı¾İ¿âÃÜÂë£¬Ìî×Ô¼ºµÄÃÜÂë
+	char dataBase_host[255];   //Êı¾İ¿âÁ¬½ÓµØÖ·£¬×¢ÒâÓĞÊ±ºòÊ¹ÓÃÖ÷»úip»á±¨´í£¬´ËÊ±¿ÉÒÔ½«ip¸ÄÎªlocalhost
 	char dataBase_name[255];
 	unsigned int dataBase_port;
-	
-	
+	bool my_encrypt(const char* str, const char* path_key, string& sign_string);
+	bool dsaVerify(const string& sign_string, const string& verify_string, const char* path_key);
+	void parseOrderDataToString(const OrderData* data,string& result);
 
 public:
 	OrderDataBase(const char* userName = "root", const char* password = "123456", const char* host = "localhost", const char* name = "order_system", unsigned int port = 3306);
 	bool findOrder(int merchant_id, string merchant_order_id, OrderData* reply);
 	bool addOrder(const OrderData* request);
-	bool connectDataBase(); //è¿æ¥æ•°æ®åº“
-	void freeConnect();   //å…³é—­æ•°æ®åº“
+	bool connectDataBase(); //Á¬½ÓÊı¾İ¿â
+	void freeConnect();   //¹Ø±ÕÊı¾İ¿â
 	
-	
-};
+	};
 
